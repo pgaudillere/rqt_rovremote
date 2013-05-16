@@ -1,0 +1,12 @@
+<library path="src">
+  <class name="RovRemote" type="rqt_rovremote.rovremote.RovRemotePlugin" base_class_type="rqt_gui_py::Plugin">
+    <description>
+      A Python GUI plugin for ROV simulator.
+    </description>
+    <qtgui>
+      <label>RovRemote</label>
+      <icon type="theme">applications-other</icon>
+      <statustip>A Python GUI plugin for controlling ROV simulator.</statustip>
+    </qtgui>
+  </class>
+</library>
