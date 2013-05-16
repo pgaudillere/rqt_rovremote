@@ -6,6 +6,7 @@ from python_qt_binding import loadUi
 from python_qt_binding.QtGui import QWidget
 from auv_msgs.msg import NavSts;
 import numpy
+import math
 
 def wrapAngle(angle):
 	if angle>math.pi:
@@ -18,11 +19,23 @@ def wrapAngle(angle):
 class RovRemotePlugin(Plugin):
 	def _on_rovX_slider_changed(self):
 		print 'rovX: ', self._widget.rovX.value()
-        	self._on_parameter_changed()
+		self._on_parameter_changed()
+
+	def _on_rovY_slider_changed(self):
+		print 'rovY: ', self._widget.rovY.value()
+		self._on_parameter_changed()
+
+	def _on_rovZ_slider_changed(self):
+		print 'rovZ: ', self._widget.rovZ.value()
+		self._on_parameter_changed()
+
+	def _on_rovYaw_slider_changed(self):
+		print 'rovYaw: ', wrapAngle((self._widget.rovYaw.value()+180)/180.0 * math.pi)/math.pi*180.0
+		self._on_parameter_changed()
 	
 	def __init__(self, context):
-	        super(RovRemotePlugin, self).__init__(context)
-	        # Give QObjects reasonable names
+		super(RovRemotePlugin, self).__init__(context)
+		# Give QObjects reasonable names
 		self.setObjectName('RovRemotePlugin')
 
 		# Process standalone plugin command-line arguments
@@ -58,22 +71,24 @@ class RovRemotePlugin(Plugin):
 	
 		#setup signals and slots
 		self._widget.rovX.valueChanged.connect(self._on_rovX_slider_changed)
+		self._widget.rovY.valueChanged.connect(self._on_rovY_slider_changed)
+		self._widget.rovZ.valueChanged.connect(self._on_rovZ_slider_changed)
+		self._widget.rovYaw.valueChanged.connect(self._on_rovYaw_slider_changed)
 
 		# setup publishers
 		#rospy.init_node("refgen");
-	    	#out = rospy.Publisher("etaRef", NavSts);
-	    	#rate = rospy.Rate(1);
-	    	#ref = NavSts();
-		self._publisher = None
+		self._publisher = rospy.Publisher("rov/etaRef", NavSts);
+		self._publisher = rospy.Publisher("rov/current", NavSts);
 
-	def _on_parameter_changed(self):
-        	self._send_ref(self._widget.rovX.value(), self._widget.rovY.value(), 
-		self._widget.rovZ.value(),	self._widget.rovYaw.value())
+		#ref = NavSts();
+		#self._publisher = None
 
 	def _send_ref(self, x_linear,y_linear, z_linear, z_angular):
-    		if self._publisher is None:
-            		return
-        	ref = NavSts()
+		print 'send ref'
+		if self._publisher is None: 
+			print 'not a publisher quit'			
+			return
+		ref = NavSts()
 		ref.position.north  = x_linear
 		ref.position.east   = y_linear
 		ref.position.depth  = z_linear
@@ -81,11 +96,27 @@ class RovRemotePlugin(Plugin):
 		print(ref)
 		self._publisher.publish(ref)
 
-    	def shutdown_plugin(self):
-		# TODO unregister all publishers here
-		self._update_parameter_timer.stop()
-		self._unregister_publisher()
+	def _send_current(self, x_linear,y_linear, z_linear, z_angular):
+		print 'send ref'
+		if self._publisher is None: 
+			print 'not a publisher quit'			
+			return
+		ref = NavSts()
+		ref.position.north  = x_linear
+		ref.position.east   = y_linear
+		ref.position.depth  = z_linear
+		ref.orientation.yaw = z_angular
+		print(ref)
+		self._publisher.publish(ref)
 
+
+	def _on_parameter_changed(self):
+		print 'parameter changed'
+		self._send_ref(self._widget.rovX.value()/10.0,self._widget.rovY.value()/10.0,self._widget.rovZ.value()/10.0,wrapAngle((self._widget.rovYaw.value()+180)/180.0 * math.pi))
+
+	def shutdown_plugin(self):
+		# TODO unregister all publishers here
+		pass
 	def save_settings(self, plugin_settings, instance_settings):
 		# TODO save intrinsic configuration, usually using:
 		# instance_settings.set_value(k, v)
