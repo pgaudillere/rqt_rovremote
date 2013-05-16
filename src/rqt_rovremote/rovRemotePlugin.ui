@@ -36,7 +36,7 @@
     </property>
     <layout class="QGridLayout" name="gridLayout">
      <item row="0" column="0">
-      <widget class="QSlider" name="rovLat">
+      <widget class="QSlider" name="rovY">
        <property name="minimum">
         <number>-100</number>
        </property>
@@ -52,7 +52,7 @@
       </widget>
      </item>
      <item row="2" column="0">
-      <widget class="QSlider" name="rovFore">
+      <widget class="QSlider" name="rovX">
        <property name="minimum">
         <number>-100</number>
        </property>
@@ -93,7 +93,7 @@
       </widget>
      </item>
      <item row="2" column="1">
-      <widget class="QSlider" name="rovVertical">
+      <widget class="QSlider" name="rovZ">
        <property name="minimum">
         <number>-100</number>
        </property>
